@@ -8,11 +8,11 @@ import matplotlib.pyplot as plt
 __author__ = 'akarapetyan'
 
 def The_omnivores_dilemma():
-    cucumber_handle = open("Lab1/cucumber.fasta", "rU")
+    cucumber_handle = open("cucumber.fasta", "rU")
     cucumber_dna = []
     for record in SeqIO.parse(cucumber_handle, "fasta"):
         cucumber_dna.append(Seq(record.seq.tostring()[21:570], generic_dna))
-    eagle_handle = open("Lab1/eagle.fasta", "rU")
+    eagle_handle = open("eagle.fasta", "rU")
     eagle_dna = []
     for record in SeqIO.parse(eagle_handle, "fasta"):
         eagle_dna.append(Seq(record.seq.tostring()[399:1521], generic_dna))
