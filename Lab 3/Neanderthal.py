@@ -1,8 +1,18 @@
 __author__ = 'akarapetyan'
+from Bio import SeqIO
 from scipy.cluster.hierarchy import linkage, dendrogram
 from scipy.spatial.distance import squareform
 import matplotlib.pyplot as plt
 import numpy as np
+
+
+def levenshtein(a, b):
+    edt = 0
+    for i in range(0, len(a), 1 ):
+        if a[i] != b[i]:
+            edt += 1
+    return edt
+
 
 
 def clusterDistances(cluster1, cluster2, DM):
@@ -16,7 +26,10 @@ def Dunn(clustering, DM):
     for cl1 in range(1, clusters):
         for cl2 in range(cl1):
             minInter = min(clusterDistances(clustering[cl1], clustering[cl2], DM), minInter)
-    return minInter/maxIntra
+    if maxIntra != 0:
+        return minInter/maxIntra
+    else:
+        return np.inf
 
 
 def flatclusterDunn(D):
@@ -39,17 +52,18 @@ def flatclusterDunn(D):
                 bestClustering = clustering
     print "The Best clustering with a maximal Dunn index is", bestClustering, bestDunn
 
+
 def heatmap(D):
     temp = D
     D = squareform(D)
     Y = linkage(D, method='average')
-    fig = plt.figure(figsize=(8, 8))
-    dendogram = fig.add_axes([0.01, 0.1, 0.1, 0.8])
+    fig = plt.figure(figsize=(18, 18))
+    dendogram = fig.add_axes([0.01, 0.1, 0.75, 0.8])
     Z = dendrogram(Y, orientation='right')
     idx = Z['leaves']
     dendogram.set_yticklabels(idx)
     D = D[idx, :][:, idx]
-    matrix = fig.add_axes([0.37, 0.1, 0.6, 0.8])
+    matrix = fig.add_axes([0.8, 0.1, 0.17, 0.3])
     im = matrix.matshow(D, aspect='auto', origin='lower', cmap=plt.cm.YlGnBu)
     matrix.set_xticklabels([])
     matrix.set_yticklabels([])
@@ -58,9 +72,15 @@ def heatmap(D):
 
 
 def main():
-    D = [1, 5, 6, 0.9, 4, 5, 0.1, 1, 4.1, 5.1]
-    heatmap(D)
+    mitoHandle = open("mitoAligned.fa", "rU")
+    mitoSeqs = []
+    for record in SeqIO.parse(mitoHandle, "fasta"):
+        mitoSeqs.append(record.seq.tostring())
+    distances = []
+    for i in range(0, len(mitoSeqs)-1, 1):
+        for j in range(i+1, len(mitoSeqs), 1):
+            distances.append(float(levenshtein(mitoSeqs[i], mitoSeqs[j])))
+    heatmap(distances)
 
 main()
-
 
